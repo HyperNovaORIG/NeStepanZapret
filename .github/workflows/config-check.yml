@@ -1,0 +1,30 @@
+name: Config Check
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check BAT syntax
+        run: |
+          @echo off
+          echo Checking batch files...
+          for %%f in ("*.bat") do (
+            echo Validating: %%f
+            findstr /R "^start.*winws\.exe" "%%f" >nul && echo  [OK] Contains winws.exe || echo  [!] No winws.exe found
+          )
+        shell: cmd
+      - name: Verify list files
+        run: |
+          echo Checking list files...
+          $missing = @()
+          @("lists/list-general.txt","lists/list-exclude.txt","lists/list-google.txt") | ForEach-Object {
+            if (-not (Test-Path $_)) { $missing += $_ }
+          }
+          if ($missing.Count -gt 0) {
+            Write-Host "Missing files: $($missing -join ', ')"
+            exit 1
+          }
+          Write-Host "All required files present!"
+        shell: pwsh
