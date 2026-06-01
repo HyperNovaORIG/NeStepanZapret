@@ -1,0 +1,6 @@
+bin/
+*.sys
+*.exe
+*.dll
+test results/
+*.backup
